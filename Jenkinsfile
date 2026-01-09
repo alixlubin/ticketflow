@@ -1,57 +1,64 @@
 pipeline {
     agent any
-options {
-    timestamps()
-    disableConcurrentBuilds()
-    ansiColor('xterm')
-}
-tools {    
-    jdk 'jdk-21'
-    nodejs 'node-20'
-}
-environment {
-    MAVEN_OPTS = '-Dmaven.repo.local=.m2/repository'
-}
-stages {
-        stage('Checkout') {
-        steps {
-            checkout scm
-        }
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
     }
-    stage('Backend - Test') {
-        steps {
-            dir('backend') {
-                sh 'mvn -B -ntp test'
+
+    tools {
+        jdk 'jdk21'
+        nodejs 'nodeJs'
+    }
+
+    environment {
+        MAVEN_OPTS = '-Dmaven.repo.local=.m2/repository'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
             }
         }
-    }
-}
-stage('Backend - Package') {
-    steps {
-        dir('backend') {
-            sh 'mvn -B -ntp -DskipTests package'
+
+        stage('Backend - Test') {
+            steps {
+                dir('backend') {
+                    sh 'mvn -B -ntp test'
+                }
+            }
         }
-    }
-}
-stage('Frontend - Install & Test') {
-    steps {
-        dir('frontend') {
-            sh 'npm ci'
-            sh 'npm test'
+
+        stage('Backend - Package') {
+            steps {
+                dir('backend') {
+                    sh 'mvn -B -ntp -DskipTests package'
+                }
+            }
         }
-    }
-}
-stage('Frontend - Build') {
-    steps {
-        dir('frontend') {
-            sh 'npm run build'
+
+        stage('Frontend - Install & Test') {
+            steps {
+                dir('frontend') {
+                    sh 'npm ci'
+                    sh 'npm test'
+                }
+            }
         }
-    }
-}
-stage('Archive artifacts') {
-        steps {
-            archiveArtifacts artifacts: 'backend/target/*.jar, frontend/dist/**', fingerprint:
-            true
+
+        stage('Frontend - Build') {
+            steps {
+                dir('frontend') {
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Archive artifacts') {
+            steps {
+                archiveArtifacts artifacts: 'backend/target/*.jar, frontend/dist/**', fingerprint: true
+            }
         }
     }
 
