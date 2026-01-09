@@ -9,6 +9,7 @@ pipeline {
     tools {
         jdk 'jdk21'
         nodejs 'nodeJs'
+        maven 'maven'
     }
 
     environment {
